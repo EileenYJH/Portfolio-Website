@@ -1,0 +1,98 @@
+:root {
+  --paper: #FAF7F2;
+  --paper-raised: #FFFFFF;
+  --ink: #1C1B18;
+  --muted: #6E6A60;
+  --line: #E5DFD4;
+  --accent: #C8501F;
+  --accent-soft: #F4E3DA;
+  --safe: #2E7D4F;
+  --danger: #C03028;
+  --warn: #D98E1B;
+  --font-display: 'Fraunces Variable', Georgia, serif;
+  --font-body: 'Inter Variable', system-ui, sans-serif;
+  --content-w: 1100px;
+  --space-section: clamp(5rem, 12vh, 9rem);
+  --radius: 14px;
+}
+
+* { box-sizing: border-box; margin: 0; }
+
+html { scroll-behavior: smooth; }
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+}
+
+body {
+  background: var(--paper);
+  color: var(--ink);
+  font-family: var(--font-body);
+  font-size: 1.0625rem;
+  line-height: 1.7;
+  -webkit-font-smoothing: antialiased;
+}
+
+h1, h2, h3 {
+  font-family: var(--font-display);
+  font-weight: 560;
+  line-height: 1.12;
+  letter-spacing: -0.015em;
+}
+
+h1 { font-size: clamp(2.6rem, 7vw, 5rem); }
+h2 { font-size: clamp(1.9rem, 4vw, 3rem); }
+h3 { font-size: clamp(1.25rem, 2.2vw, 1.6rem); }
+
+p { max-width: 65ch; }
+
+a { color: inherit; }
+
+img, video { max-width: 100%; height: auto; display: block; }
+
+.wrap {
+  width: min(var(--content-w), 100% - 3rem);
+  margin-inline: auto;
+}
+
+.section {
+  padding-block: var(--space-section);
+}
+
+.eyebrow {
+  font-size: 0.8rem;
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--accent);
+}
+
+.muted { color: var(--muted); }
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.8rem 1.6rem;
+  border-radius: 999px;
+  border: 1.5px solid var(--ink);
+  background: var(--ink);
+  color: var(--paper);
+  font-weight: 550;
+  font-size: 0.95rem;
+  text-decoration: none;
+  transition: transform 0.25s ease, background 0.25s ease, color 0.25s ease;
+}
+.btn:hover { transform: translateY(-2px); }
+.btn--ghost { background: transparent; color: var(--ink); }
+.btn--ghost:hover { background: var(--ink); color: var(--paper); }
+
+.card {
+  background: var(--paper-raised);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  padding: 1.5rem;
+}
+
+[data-split] .split-line { overflow: hidden; }
+
+::selection { background: var(--accent-soft); }

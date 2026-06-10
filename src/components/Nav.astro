@@ -1,0 +1,48 @@
+---
+const links = [
+  { href: '/projects', label: 'Projects' },
+  { href: '/blog', label: 'Blog' },
+  { href: '/about', label: 'About' },
+];
+const path = Astro.url.pathname;
+---
+<header class="nav-bar">
+  <div class="wrap nav-inner">
+    <a href="/" class="nav-brand">Eileen Yeoh</a>
+    <nav aria-label="Main">
+      {links.map((l) => (
+        <a href={l.href} class:list={['nav-link', { active: path.startsWith(l.href) }]}>{l.label}</a>
+      ))}
+    </nav>
+  </div>
+</header>
+<style>
+  .nav-bar {
+    position: sticky;
+    top: 0;
+    z-index: 50;
+    background: color-mix(in srgb, var(--paper) 88%, transparent);
+    backdrop-filter: blur(10px);
+    border-bottom: 1px solid var(--line);
+  }
+  .nav-inner {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding-block: 0.9rem;
+  }
+  .nav-brand {
+    font-family: var(--font-display);
+    font-size: 1.15rem;
+    font-weight: 600;
+    text-decoration: none;
+  }
+  .nav-link {
+    margin-left: 1.6rem;
+    text-decoration: none;
+    font-size: 0.95rem;
+    color: var(--muted);
+    transition: color 0.2s ease;
+  }
+  .nav-link:hover, .nav-link.active { color: var(--ink); }
+</style>

@@ -1,0 +1,26 @@
+---
+const year = new Date().getFullYear();
+---
+<footer class="footer">
+  <div class="wrap footer-inner">
+    <div>
+      <p class="footer-name">Eileen Yeoh</p>
+      <p class="muted footer-tag">Electrical &amp; electronics engineering — systems, circuits, firmware.</p>
+    </div>
+    <nav class="footer-links" aria-label="Social">
+      <a href="https://github.com/EileenYJH" rel="me noopener" target="_blank">GitHub</a>
+      <a href="/cv.pdf" download>Download CV</a>
+      <a href="mailto:eileenyeoh06@gmail.com">Email</a>
+    </nav>
+  </div>
+  <div class="wrap muted footer-meta">© {year} Eileen Yeoh · Built with Astro</div>
+</footer>
+<style>
+  .footer { border-top: 1px solid var(--line); padding-block: 3rem 2rem; margin-top: var(--space-section); }
+  .footer-inner { display: flex; flex-wrap: wrap; gap: 2rem; justify-content: space-between; align-items: start; }
+  .footer-name { font-family: var(--font-display); font-size: 1.3rem; }
+  .footer-tag { font-size: 0.9rem; }
+  .footer-links { display: flex; gap: 1.5rem; }
+  .footer-links a { font-size: 0.95rem; }
+  .footer-meta { margin-top: 2.5rem; font-size: 0.8rem; }
+</style>
