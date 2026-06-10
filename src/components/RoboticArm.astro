@@ -1,0 +1,120 @@
+<div class="arm-stage" id="arm-stage" aria-hidden="true">
+  <svg id="arm-svg" viewBox="0 0 600 600" fill="none">
+    <ellipse cx="300" cy="565" rx="120" ry="16" fill="#EFE9DF" />
+    <g id="arm-base">
+      <rect x="255" y="490" width="90" height="75" rx="12" fill="#1C1B18" />
+      <circle cx="300" cy="490" r="34" fill="#1C1B18" />
+      <circle cx="300" cy="490" r="10" fill="#C8501F" />
+    </g>
+    <g id="arm-upper" transform-origin="300 490">
+      <rect x="284" y="290" width="32" height="206" rx="16" fill="#33312C" />
+      <circle cx="300" cy="300" r="24" fill="#1C1B18" />
+      <circle cx="300" cy="300" r="7" fill="#C8501F" />
+      <g id="arm-fore" transform-origin="300 300">
+        <rect x="287" y="130" width="26" height="176" rx="13" fill="#4A4740" />
+        <circle cx="300" cy="140" r="18" fill="#1C1B18" />
+        <g id="arm-hand" transform-origin="300 140">
+          <rect x="288" y="96" width="24" height="48" rx="8" fill="#1C1B18" />
+          <path id="finger-l" d="M291 100 q-14 -20 -6 -38" stroke="#1C1B18" stroke-width="9" stroke-linecap="round" transform-origin="291 100" />
+          <path id="finger-r" d="M309 100 q14 -20 6 -38" stroke="#1C1B18" stroke-width="9" stroke-linecap="round" transform-origin="309 100" />
+          <circle cx="300" cy="100" r="5" fill="#C8501F" />
+        </g>
+      </g>
+    </g>
+  </svg>
+</div>
+
+<style>
+  .arm-stage {
+    width: min(480px, 80vw);
+    aspect-ratio: 1;
+    margin-inline: auto;
+  }
+  .arm-stage svg { width: 100%; height: 100%; }
+</style>
+
+<script>
+  const stage = document.getElementById('arm-stage');
+  const svg = document.getElementById('arm-svg') as unknown as SVGSVGElement | null;
+  const upper = document.getElementById('arm-upper');
+  const fore = document.getElementById('arm-fore');
+  const fingerL = document.getElementById('finger-l');
+  const fingerR = document.getElementById('finger-r');
+
+  if (stage && svg && upper && fore && fingerL && fingerR) {
+    const SHOULDER = { x: 300, y: 490 };
+    const L1 = 190;
+    const L2 = 160;
+    const REST = { x: 300, y: 160 };
+
+    let target = { ...REST };
+    const cur = { shoulder: 0, elbow: 0 };
+    let goal = { shoulder: 0, elbow: 0 };
+    let lastMove = 0;
+    let t = 0;
+
+    const clamp = (v: number, lo: number, hi: number) => Math.min(hi, Math.max(lo, v));
+
+    function solveIK(tx: number, ty: number) {
+      const dx = tx - SHOULDER.x;
+      const dy = ty - SHOULDER.y;
+      const d = clamp(Math.hypot(dx, dy), 40, L1 + L2 - 4);
+      const baseAngle = Math.atan2(dy, dx);
+      const cosShoulder = clamp((L1 * L1 + d * d - L2 * L2) / (2 * L1 * d), -1, 1);
+      const cosElbow = clamp((L1 * L1 + L2 * L2 - d * d) / (2 * L1 * L2), -1, 1);
+      const shoulderRad = baseAngle + Math.acos(cosShoulder);
+      const elbowRad = Math.acos(cosElbow) - Math.PI;
+      const restShoulder = -Math.PI / 2;
+      return {
+        shoulder: ((shoulderRad - restShoulder) * 180) / Math.PI,
+        elbow: ((elbowRad + Math.PI) * 180) / Math.PI - 180,
+      };
+    }
+
+    function toSvgPoint(clientX: number, clientY: number) {
+      const pt = new DOMPoint(clientX, clientY);
+      const m = svg!.getScreenCTM();
+      if (!m) return REST;
+      const p = pt.matrixTransform(m.inverse());
+      return { x: p.x, y: p.y };
+    }
+
+    const fine = window.matchMedia('(pointer: fine)').matches;
+    const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+    if (fine && !reduced) {
+      window.addEventListener('pointermove', (e) => {
+        target = toSvgPoint(e.clientX, e.clientY);
+        lastMove = performance.now();
+      });
+    }
+
+    function frame(now: number) {
+      t += 0.016;
+      const idle = now - lastMove > 2200 || !fine;
+      const aim = idle
+        ? { x: REST.x + Math.sin(t * 0.7) * 36, y: REST.y + Math.cos(t * 0.5) * 22 }
+        : target;
+      goal = solveIK(aim.x, aim.y);
+      cur.shoulder += (goal.shoulder - cur.shoulder) * 0.09;
+      cur.elbow += (goal.elbow - cur.elbow) * 0.09;
+      upper!.setAttribute('transform', `rotate(${clamp(cur.shoulder, -70, 70)})`);
+      fore!.setAttribute('transform', `rotate(${clamp(cur.elbow, -120, 120)})`);
+      const dist = Math.hypot(aim.x - SHOULDER.x, aim.y - SHOULDER.y);
+      const grip = clamp((dist - 120) / (L1 + L2 - 120), 0, 1) * 16;
+      fingerL!.setAttribute('transform', `rotate(${-grip})`);
+      fingerR!.setAttribute('transform', `rotate(${grip})`);
+      requestAnimationFrame(frame);
+    }
+
+    const initial = solveIK(REST.x + 30, REST.y);
+    cur.shoulder = initial.shoulder;
+    cur.elbow = initial.elbow;
+    upper.setAttribute('transform', `rotate(${initial.shoulder})`);
+    fore.setAttribute('transform', `rotate(${initial.elbow})`);
+
+    if (!reduced) {
+      requestAnimationFrame(frame);
+    }
+  }
+</script>
