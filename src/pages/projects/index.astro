@@ -1,0 +1,33 @@
+---
+import { getCollection } from 'astro:content';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import ProjectCard from '../../components/ProjectCard.astro';
+
+const projects = (await getCollection('projects')).sort((a, b) => a.data.order - b.data.order);
+---
+<BaseLayout title="Projects — Eileen Yeoh" description="Engineering projects by Eileen Yeoh — interactive deep-dives into hardware and firmware.">
+  <section class="section wrap">
+    <p class="eyebrow" data-reveal>Projects</p>
+    <h1 data-split>Built, broken, rebuilt, explained</h1>
+    <div class="proj-grid">
+      {projects.map((p, i) => (
+        <ProjectCard
+          title={p.data.title}
+          summary={p.data.summary}
+          tags={p.data.tags}
+          href={p.data.href ?? '#'}
+          index={i}
+        />
+      ))}
+    </div>
+  </section>
+</BaseLayout>
+
+<style>
+  .proj-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(290px, 1fr));
+    gap: 1.5rem;
+    margin-top: 2.5rem;
+  }
+</style>

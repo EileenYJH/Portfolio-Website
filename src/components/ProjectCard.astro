@@ -1,0 +1,52 @@
+---
+interface Props {
+  title: string;
+  summary: string;
+  tags: string[];
+  href: string;
+  index: number;
+}
+const { title, summary, tags, href, index } = Astro.props;
+---
+<a class="proj-card card" href={href} data-reveal data-reveal-delay={index * 0.08}>
+  <p class="eyebrow">{String(index + 1).padStart(2, '0')}</p>
+  <h3>{title}</h3>
+  <p class="muted proj-summary">{summary}</p>
+  <ul class="proj-tags">
+    {tags.map((t) => <li>{t}</li>)}
+  </ul>
+  <span class="proj-cta">Explore the system →</span>
+</a>
+<style>
+  .proj-card {
+    display: block;
+    text-decoration: none;
+    transition: transform 0.3s ease, border-color 0.3s ease;
+  }
+  .proj-card:hover { transform: translateY(-4px); border-color: var(--accent); }
+  .proj-card h3 { margin-top: 0.4rem; }
+  .proj-summary { font-size: 0.95rem; margin-top: 0.6rem; }
+  .proj-tags {
+    list-style: none;
+    padding: 0;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    margin-top: 1rem;
+  }
+  .proj-tags li {
+    font-size: 0.75rem;
+    font-weight: 550;
+    padding: 0.25rem 0.7rem;
+    border-radius: 999px;
+    background: var(--accent-soft);
+    color: var(--accent);
+  }
+  .proj-cta {
+    display: inline-block;
+    margin-top: 1.2rem;
+    font-size: 0.9rem;
+    font-weight: 550;
+    color: var(--accent);
+  }
+</style>

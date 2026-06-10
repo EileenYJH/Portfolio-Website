@@ -1,0 +1,61 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+
+const skills = [
+  { area: 'Embedded systems', items: 'ESP32, Arduino, C/C++, ESP-NOW, I2C/SPI/UART' },
+  { area: 'Electronics', items: 'Sensor interfacing, ADC calibration, relays & actuators, circuit prototyping' },
+  { area: 'Software', items: 'TypeScript, Python, web dashboards (WebSocket), Git' },
+  { area: 'Tools', items: 'Arduino IDE, PlatformIO, oscilloscope & multimeter, KiCad basics' },
+];
+---
+<BaseLayout title="About — Eileen Yeoh" description="Eileen Yeoh — electrical & electronics engineering student building interactive, intelligent hardware systems.">
+  <section class="section wrap">
+    <p class="eyebrow" data-reveal>About</p>
+    <h1 data-split>Hi, I'm Eileen.</h1>
+    <div class="about-grid">
+      <div class="about-story" data-reveal>
+        <p>
+          I'm an electrical &amp; electronics engineering student who likes
+          building systems end to end — from the sensor soldered on a
+          breadboard to the firmware that reads it to the dashboard that
+          explains it.
+        </p>
+        <p>
+          My current flagship project is <a href="/projects/aria">ARIA</a>, a
+          six-node wireless fire-detection network that learned to tell real
+          fires from burnt toast. It taught me more about signal noise,
+          calibration, and honest engineering trade-offs than any lecture.
+        </p>
+        <p>
+          I'm looking for internships and collaborations in embedded systems,
+          IoT, and anywhere hardware meets software.
+        </p>
+        <a class="btn" href="/cv.pdf" download>Download my CV</a>
+      </div>
+      <div class="about-skills">
+        {skills.map((s, i) => (
+          <div class="card" data-reveal data-reveal-delay={i * 0.07}>
+            <h3>{s.area}</h3>
+            <p class="muted skill-items">{s.items}</p>
+          </div>
+        ))}
+      </div>
+    </div>
+  </section>
+</BaseLayout>
+
+<style>
+  .about-grid {
+    display: grid;
+    grid-template-columns: 1.1fr 1fr;
+    gap: 3rem;
+    margin-top: 2.5rem;
+  }
+  .about-story p { margin-bottom: 1.2rem; }
+  .about-story .btn { margin-top: 1rem; }
+  .about-skills { display: grid; gap: 1.2rem; align-content: start; }
+  .skill-items { font-size: 0.92rem; margin-top: 0.4rem; }
+  @media (max-width: 800px) {
+    .about-grid { grid-template-columns: 1fr; }
+  }
+</style>

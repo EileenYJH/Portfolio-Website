@@ -1,11 +1,113 @@
 ---
+import { getCollection } from 'astro:content';
 import BaseLayout from '../layouts/BaseLayout.astro';
 import RoboticArm from '../components/RoboticArm.astro';
+import ProjectCard from '../components/ProjectCard.astro';
+
+const projects = (await getCollection('projects')).sort((a, b) => a.data.order - b.data.order);
+const posts = (await getCollection('blog'))
+  .sort((a, b) => b.data.date.valueOf() - a.data.date.valueOf())
+  .slice(0, 3);
+const fmt = new Intl.DateTimeFormat('en', { day: 'numeric', month: 'short', year: 'numeric' });
 ---
-<BaseLayout title="Eileen Yeoh — Portfolio">
-  <section class="section wrap">
-    <h1 data-split>Eileen Yeoh</h1>
-    <p class="muted" data-reveal>Site under construction.</p>
+<BaseLayout title="Eileen Yeoh — engineer of interactive systems">
+  <section class="hero wrap">
+    <div class="hero-copy">
+      <p class="eyebrow" data-reveal>Electrical &amp; electronics engineering</p>
+      <h1 data-split>I build systems where hardware meets intelligence.</h1>
+      <p class="muted hero-sub" data-reveal data-reveal-delay="0.15">
+        Sensor networks, embedded firmware, and the theory behind them —
+        explained visually, built to be played with.
+      </p>
+      <div class="hero-actions" data-reveal data-reveal-delay="0.25">
+        <a class="btn" href="/projects/aria">Explore ARIA</a>
+        <a class="btn btn--ghost" href="/about">About me</a>
+      </div>
+    </div>
     <RoboticArm />
   </section>
+
+  <section class="section wrap">
+    <p class="eyebrow" data-reveal>Featured work</p>
+    <h2 data-split>Projects you can play with</h2>
+    <div class="proj-grid">
+      {projects.map((p, i) => (
+        <ProjectCard
+          title={p.data.title}
+          summary={p.data.summary}
+          tags={p.data.tags}
+          href={p.data.href ?? '/projects'}
+          index={i}
+        />
+      ))}
+    </div>
+  </section>
+
+  <section class="section wrap about-teaser">
+    <p class="eyebrow" data-reveal>About</p>
+    <h2 data-split>Engineering is a story worth telling well.</h2>
+    <p class="muted" data-reveal>
+      I'm an electrical &amp; electronics engineering student who believes a
+      project isn't finished until someone else can understand it. This site is
+      where my circuits, firmware, and systems get explained the way I wish
+      textbooks did.
+    </p>
+    <a class="btn btn--ghost" href="/about" data-reveal>More about me</a>
+  </section>
+
+  <section class="section wrap">
+    <p class="eyebrow" data-reveal>Writing</p>
+    <h2 data-split>Latest from the blog</h2>
+    <div class="post-list">
+      {posts.map((post) => (
+        <a class="post-row" href={`/blog/${post.id}`} data-reveal>
+          <span class="muted post-date">{fmt.format(post.data.date)}</span>
+          <span class="post-title">{post.data.title}</span>
+          <span class="post-arrow">→</span>
+        </a>
+      ))}
+    </div>
+  </section>
 </BaseLayout>
+
+<style>
+  .hero {
+    display: grid;
+    grid-template-columns: 1.2fr 1fr;
+    align-items: center;
+    gap: 2rem;
+    min-height: min(82vh, 760px);
+    padding-block: 3rem;
+  }
+  .hero-sub { margin-top: 1.4rem; font-size: 1.15rem; }
+  .hero-actions { display: flex; gap: 1rem; margin-top: 2.2rem; flex-wrap: wrap; }
+  .proj-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(290px, 1fr));
+    gap: 1.5rem;
+    margin-top: 2.5rem;
+  }
+  .about-teaser h2 { max-width: 18ch; }
+  .about-teaser .btn--ghost { margin-top: 1.8rem; }
+  .post-list { margin-top: 2.5rem; border-top: 1px solid var(--line); }
+  .post-row {
+    display: grid;
+    grid-template-columns: 9rem 1fr auto;
+    gap: 1.5rem;
+    align-items: baseline;
+    padding: 1.4rem 0.5rem;
+    border-bottom: 1px solid var(--line);
+    text-decoration: none;
+    transition: background 0.2s ease;
+  }
+  .post-row:hover { background: var(--paper-raised); }
+  .post-title { font-family: var(--font-display); font-size: 1.25rem; }
+  .post-arrow { color: var(--accent); }
+  .post-date { font-size: 0.85rem; }
+  @media (max-width: 800px) {
+    .hero { grid-template-columns: 1fr; text-align: center; }
+    .hero-actions { justify-content: center; }
+    .post-row { grid-template-columns: 1fr auto; }
+    .post-date { grid-column: 1 / -1; }
+  }
+</style>

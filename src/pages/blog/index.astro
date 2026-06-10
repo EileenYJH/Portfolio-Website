@@ -1,0 +1,50 @@
+---
+import { getCollection } from 'astro:content';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+
+const posts = (await getCollection('blog')).sort(
+  (a, b) => b.data.date.valueOf() - a.data.date.valueOf(),
+);
+const fmt = new Intl.DateTimeFormat('en', { day: 'numeric', month: 'short', year: 'numeric' });
+---
+<BaseLayout title="Blog — Eileen Yeoh" description="Notes on circuits, firmware, and engineering school — by Eileen Yeoh.">
+  <section class="section wrap">
+    <p class="eyebrow" data-reveal>Blog</p>
+    <h1 data-split>Notes from the bench</h1>
+    <div class="blog-grid">
+      {posts.map((post, i) => (
+        <a class="card blog-card" href={`/blog/${post.id}`} data-reveal data-reveal-delay={i * 0.06}>
+          <p class="muted blog-date">{fmt.format(post.data.date)}</p>
+          <h3>{post.data.title}</h3>
+          <p class="muted blog-desc">{post.data.description}</p>
+          <ul class="blog-tags">
+            {post.data.tags.map((t) => <li>{t}</li>)}
+          </ul>
+        </a>
+      ))}
+    </div>
+  </section>
+</BaseLayout>
+
+<style>
+  .blog-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 1.5rem;
+    margin-top: 2.5rem;
+  }
+  .blog-card { text-decoration: none; transition: transform 0.3s ease, border-color 0.3s ease; }
+  .blog-card:hover { transform: translateY(-4px); border-color: var(--accent); }
+  .blog-date { font-size: 0.85rem; }
+  .blog-card h3 { margin-top: 0.5rem; }
+  .blog-desc { font-size: 0.95rem; margin-top: 0.6rem; }
+  .blog-tags { list-style: none; padding: 0; display: flex; gap: 0.5rem; flex-wrap: wrap; margin-top: 1rem; }
+  .blog-tags li {
+    font-size: 0.75rem;
+    font-weight: 550;
+    padding: 0.25rem 0.7rem;
+    border-radius: 999px;
+    background: var(--accent-soft);
+    color: var(--accent);
+  }
+</style>

@@ -1,0 +1,44 @@
+---
+import { getCollection, render } from 'astro:content';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+
+export async function getStaticPaths() {
+  const posts = await getCollection('blog');
+  return posts.map((post) => ({ params: { slug: post.id }, props: { post } }));
+}
+
+const { post } = Astro.props;
+const { Content } = await render(post);
+const fmt = new Intl.DateTimeFormat('en', { day: 'numeric', month: 'long', year: 'numeric' });
+const words = post.body ? post.body.split(/\s+/).length : 0;
+const minutes = Math.max(1, Math.round(words / 220));
+---
+<BaseLayout title={`${post.data.title} — Eileen Yeoh`} description={post.data.description}>
+  <article class="section wrap post">
+    <p class="eyebrow" data-reveal>{fmt.format(post.data.date)} · {minutes} min read</p>
+    <h1 data-split>{post.data.title}</h1>
+    <div class="post-body">
+      <Content />
+    </div>
+  </article>
+</BaseLayout>
+
+<style>
+  .post { max-width: 760px; margin-inline: auto; }
+  .post-body { margin-top: 2.5rem; }
+  .post-body :global(h2) { margin-top: 2.5rem; }
+  .post-body :global(p) { margin-top: 1.2rem; }
+  .post-body :global(pre) {
+    margin-top: 1.2rem;
+    padding: 1.2rem;
+    border-radius: var(--radius);
+    overflow-x: auto;
+    font-size: 0.9rem;
+  }
+  .post-body :global(blockquote) {
+    margin-top: 1.2rem;
+    padding-left: 1.2rem;
+    border-left: 3px solid var(--accent);
+    color: var(--muted);
+  }
+</style>
