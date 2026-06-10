@@ -1,0 +1,124 @@
+<div class="evac card" data-reveal>
+  <div class="evac-map">
+    <svg viewBox="0 0 760 240" role="img" aria-label="Interactive floor map with zones A, B, C. Click a zone to simulate fire and see evacuation arrows re-route.">
+      <text x="28" y="126" font-family="Inter Variable, sans-serif" font-size="12" font-weight="600" fill="#6E6A60" transform="rotate(-90 28 126)">EXIT A</text>
+      <rect x="40" y="40" width="14" height="160" rx="4" fill="#2E7D4F" id="exit-A" />
+      <text x="732" y="126" font-family="Inter Variable, sans-serif" font-size="12" font-weight="600" fill="#6E6A60" transform="rotate(90 732 126)">EXIT C</text>
+      <rect x="706" y="40" width="14" height="160" rx="4" fill="#2E7D4F" id="exit-C" />
+      <rect x="333" y="26" width="94" height="14" rx="4" fill="#2E7D4F" id="exit-B" />
+      <text x="380" y="18" text-anchor="middle" font-family="Inter Variable, sans-serif" font-size="12" font-weight="600" fill="#6E6A60">EXIT B</text>
+      {(['A', 'B', 'C'] as const).map((z, i) => (
+        <g class="zone" data-zone={z} style="cursor: pointer;">
+          <rect x={70 + i * 212} y="40" width="196" height="160" rx="10" fill="#FFFFFF" stroke="#E5DFD4" stroke-width="1.5" id={`zone-rect-${z}`} />
+          <text x={168 + i * 212} y="78" text-anchor="middle" font-family="Fraunces Variable, serif" font-size="26" fill="#1C1B18">Zone {z}</text>
+          <text x={168 + i * 212} y="100" text-anchor="middle" font-family="Inter Variable, sans-serif" font-size="11" fill="#6E6A60" id={`zone-hint-${z}`}>click to ignite</text>
+          <text x={168 + i * 212} y="160" text-anchor="middle" font-size="34" id={`zone-arrow-${z}`} fill="#2E7D4F"></text>
+        </g>
+      ))}
+    </svg>
+  </div>
+  <div class="evac-side">
+    <p class="evac-title">Exit congestion</p>
+    {(['A', 'B', 'C'] as const).map((z) => (
+      <label class="evac-check"><input type="checkbox" data-congest={z} /> Exit {z} congested</label>
+    ))}
+    <button type="button" id="evac-reset" class="evac-reset">Reset</button>
+    <ul class="evac-legend muted">
+      <li><span style="background: #2E7D4F;"></span> safe — follow arrows</li>
+      <li><span style="background: #C03028;"></span> fire — routing away</li>
+      <li><span style="background: #D98E1B;"></span> exit congested — re-routed</li>
+    </ul>
+  </div>
+</div>
+
+<style>
+  .evac { display: grid; grid-template-columns: 2.2fr 1fr; gap: 1.5rem; padding: 1.5rem; align-items: center; }
+  .evac-map svg { width: 100%; height: auto; }
+  .evac-title { font-weight: 600; font-size: 0.9rem; }
+  .evac-check { display: flex; gap: 0.45rem; align-items: center; font-size: 0.9rem; margin-top: 0.5rem; }
+  .evac-check input { accent-color: var(--accent); }
+  .evac-reset {
+    margin-top: 1rem;
+    font: inherit;
+    font-size: 0.85rem;
+    font-weight: 550;
+    padding: 0.45rem 1.1rem;
+    border-radius: 999px;
+    border: 1px solid var(--line);
+    background: var(--paper);
+    cursor: pointer;
+  }
+  .evac-reset:hover { border-color: var(--accent); }
+  .evac-legend { list-style: none; padding: 0; margin-top: 1.4rem; font-size: 0.8rem; display: grid; gap: 0.4rem; }
+  .evac-legend span { display: inline-block; width: 12px; height: 12px; border-radius: 3px; margin-right: 0.4rem; vertical-align: -1px; }
+  @media (max-width: 800px) { .evac { grid-template-columns: 1fr; } }
+</style>
+
+<script>
+  import { routeZones, type ZoneId } from '../../lib/evac-routing';
+
+  const fire = new Set<ZoneId>();
+  const congested = new Set<ZoneId>();
+  const ZONES: ZoneId[] = ['A', 'B', 'C'];
+
+  const FILL: Record<string, string> = {
+    off: '#FFFFFF',
+    green: '#E3F0E8',
+    red: '#F7E2E0',
+    orange: '#F9EDDA',
+  };
+  const STROKE: Record<string, string> = {
+    off: '#E5DFD4',
+    green: '#2E7D4F',
+    red: '#C03028',
+    orange: '#D98E1B',
+  };
+  const ARROW: Record<string, string> = { left: '←', right: '→', none: '' };
+
+  function render() {
+    const plan = routeZones(fire, congested);
+    for (const z of ZONES) {
+      const rect = document.getElementById(`zone-rect-${z}`);
+      const arrow = document.getElementById(`zone-arrow-${z}`);
+      const hint = document.getElementById(`zone-hint-${z}`);
+      if (!rect || !arrow || !hint) continue;
+      const route = plan[z];
+      rect.setAttribute('fill', FILL[route.color]);
+      rect.setAttribute('stroke', STROKE[route.color]);
+      arrow.textContent = fire.has(z) ? '🔥' : ARROW[route.direction];
+      arrow.setAttribute('fill', STROKE[route.color]);
+      hint.textContent = fire.has(z) ? 'click to extinguish' : 'click to ignite';
+    }
+    for (const z of ZONES) {
+      const exit = document.getElementById(`exit-${z}`);
+      if (exit) exit.setAttribute('fill', congested.has(z) ? '#D98E1B' : '#2E7D4F');
+    }
+  }
+
+  document.querySelectorAll<SVGGElement>('.zone').forEach((g) => {
+    g.addEventListener('click', () => {
+      const z = g.dataset.zone as ZoneId;
+      if (fire.has(z)) fire.delete(z);
+      else fire.add(z);
+      render();
+    });
+  });
+
+  document.querySelectorAll<HTMLInputElement>('[data-congest]').forEach((cb) => {
+    cb.addEventListener('change', () => {
+      const z = cb.dataset.congest as ZoneId;
+      if (cb.checked) congested.add(z);
+      else congested.delete(z);
+      render();
+    });
+  });
+
+  document.getElementById('evac-reset')?.addEventListener('click', () => {
+    fire.clear();
+    congested.clear();
+    document.querySelectorAll<HTMLInputElement>('[data-congest]').forEach((cb) => (cb.checked = false));
+    render();
+  });
+
+  render();
+</script>

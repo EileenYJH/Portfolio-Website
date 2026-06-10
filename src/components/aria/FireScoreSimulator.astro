@@ -1,0 +1,180 @@
+<div class="sim card" data-reveal>
+  <div class="sim-controls">
+    <div class="sim-field">
+      <label for="sim-smoke">Smoke (MQ-2)</label>
+      <select id="sim-smoke">
+        <option value="clean" selected>Clean air</option>
+        <option value="slight">Slight smoke</option>
+        <option value="spike">Heavy spike</option>
+      </select>
+    </div>
+    <div class="sim-field">
+      <label for="sim-co">Carbon monoxide: <output id="sim-co-out">5</output> ppm</label>
+      <input type="range" id="sim-co" min="0" max="300" step="5" value="5" />
+    </div>
+    <div class="sim-field">
+      <label for="sim-air">Air quality (MQ-135)</label>
+      <select id="sim-air">
+        <option value="clean" selected>Clean</option>
+        <option value="poor">Poor</option>
+        <option value="hazard">Hazardous</option>
+      </select>
+    </div>
+    <div class="sim-field">
+      <label for="sim-humidity">Humidity trend (DHT)</label>
+      <select id="sim-humidity">
+        <option value="stable" selected>Stable</option>
+        <option value="rising">Rising (steam)</option>
+        <option value="dropping-fast">Dropping fast (heat)</option>
+      </select>
+    </div>
+    <div class="sim-toggles">
+      <label class="sim-check"><input type="checkbox" id="sim-flame" /> Flame detected</label>
+      <label class="sim-check"><input type="checkbox" id="sim-rising" /> CO rising fast</label>
+    </div>
+    <div class="sim-presets">
+      <button type="button" data-preset="cooking">Burnt toast</button>
+      <button type="button" data-preset="steam">Hot shower</button>
+      <button type="button" data-preset="fire">Real fire</button>
+      <button type="button" data-preset="gas">Gas leak</button>
+    </div>
+  </div>
+  <div class="sim-readout">
+    <p class="sim-score-label muted">Fire score</p>
+    <p class="sim-score" id="sim-score">0</p>
+    <p class="sim-tier" id="sim-tier">Normal</p>
+    <div class="sim-bar"><div class="sim-bar-fill" id="sim-bar"></div></div>
+    <p class="muted sim-note" id="sim-note">All quiet. This is the exact scoring logic running on each ARIA node every 500 ms.</p>
+  </div>
+</div>
+
+<style>
+  .sim { display: grid; grid-template-columns: 1.2fr 1fr; gap: 2rem; padding: 2rem; }
+  .sim-controls { display: grid; gap: 1.1rem; align-content: start; }
+  .sim-field label { display: block; font-size: 0.85rem; font-weight: 550; margin-bottom: 0.35rem; }
+  .sim-field select, .sim-field input[type='range'] { width: 100%; }
+  .sim-field select {
+    padding: 0.5rem 0.7rem;
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    background: var(--paper);
+    font: inherit;
+  }
+  .sim-field input[type='range'] { accent-color: var(--accent); }
+  .sim-toggles { display: flex; gap: 1.5rem; flex-wrap: wrap; }
+  .sim-check { font-size: 0.9rem; display: flex; gap: 0.45rem; align-items: center; }
+  .sim-check input { accent-color: var(--accent); width: 1.05rem; height: 1.05rem; }
+  .sim-presets { display: flex; gap: 0.6rem; flex-wrap: wrap; }
+  .sim-presets button {
+    font: inherit;
+    font-size: 0.82rem;
+    font-weight: 550;
+    padding: 0.45rem 0.95rem;
+    border-radius: 999px;
+    border: 1px solid var(--line);
+    background: var(--paper);
+    cursor: pointer;
+    transition: border-color 0.2s ease, background 0.2s ease;
+  }
+  .sim-presets button:hover { border-color: var(--accent); background: var(--accent-soft); }
+  .sim-readout {
+    text-align: center;
+    display: grid;
+    align-content: center;
+    gap: 0.3rem;
+    border-left: 1px solid var(--line);
+    padding-left: 2rem;
+  }
+  .sim-score-label { font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.1em; }
+  .sim-score { font-family: var(--font-display); font-size: 5rem; line-height: 1; transition: color 0.3s ease; }
+  .sim-tier { font-weight: 600; font-size: 1.1rem; }
+  .sim-bar { height: 10px; border-radius: 999px; background: var(--line); overflow: hidden; margin-top: 0.8rem; }
+  .sim-bar-fill { height: 100%; width: 0%; border-radius: 999px; background: var(--safe); transition: width 0.4s ease, background 0.4s ease; }
+  .sim-note { font-size: 0.85rem; margin-top: 0.8rem; }
+  @media (max-width: 800px) {
+    .sim { grid-template-columns: 1fr; }
+    .sim-readout { border-left: 0; padding-left: 0; border-top: 1px solid var(--line); padding-top: 1.5rem; }
+  }
+</style>
+
+<script>
+  import { computeFireScore, type SensorInputs, type SmokeLevel, type AirQuality, type HumidityTrend } from '../../lib/fire-score';
+
+  const $ = <T extends HTMLElement>(id: string) => document.getElementById(id) as T | null;
+  const smoke = $('sim-smoke') as HTMLSelectElement | null;
+  const co = $('sim-co') as HTMLInputElement | null;
+  const coOut = $('sim-co-out');
+  const air = $('sim-air') as HTMLSelectElement | null;
+  const humidity = $('sim-humidity') as HTMLSelectElement | null;
+  const flame = $('sim-flame') as HTMLInputElement | null;
+  const rising = $('sim-rising') as HTMLInputElement | null;
+  const scoreEl = $('sim-score');
+  const tierEl = $('sim-tier');
+  const barEl = $('sim-bar');
+  const noteEl = $('sim-note');
+
+  const TIER_COLOR: Record<string, string> = {
+    Normal: 'var(--safe)',
+    'Pre-warning': 'var(--warn)',
+    Emergency: 'var(--danger)',
+    Critical: 'var(--danger)',
+  };
+
+  const NOTES: Record<string, string> = {
+    Normal: 'All quiet. This is the exact scoring logic running on each ARIA node every 500 ms.',
+    'Pre-warning': 'Tier 1: the hub pulses the zone LEDs orange and sends a Telegram heads-up.',
+    Emergency: 'Tier 2: alarm sounds, LED strips switch to evacuation routing.',
+    Critical: 'Tier 3: rapid alarm, all alerts firing.',
+    gas: 'Gas-leak pattern: combustibles high but no combustion markers — ARIA switches to gas mode (yellow strips, fan on) instead of a fire alarm.',
+  };
+
+  function read(): SensorInputs {
+    return {
+      smoke: (smoke?.value ?? 'clean') as SmokeLevel,
+      coPpm: Number(co?.value ?? 0),
+      coRisingFast: rising?.checked ?? false,
+      flame: flame?.checked ?? false,
+      humidity: (humidity?.value ?? 'stable') as HumidityTrend,
+      airQuality: (air?.value ?? 'clean') as AirQuality,
+    };
+  }
+
+  function update() {
+    if (!scoreEl || !tierEl || !barEl || !noteEl) return;
+    if (coOut && co) coOut.textContent = co.value;
+    const result = computeFireScore(read());
+    const gas = result.mode === 'gas-leak';
+    scoreEl.textContent = String(result.score);
+    tierEl.textContent = gas ? 'Gas leak' : result.tierLabel;
+    const color = gas ? 'var(--warn)' : TIER_COLOR[result.tierLabel];
+    scoreEl.style.color = color;
+    tierEl.style.color = color;
+    barEl.style.width = `${result.score * 10}%`;
+    barEl.style.background = color;
+    noteEl.textContent = gas ? NOTES.gas : NOTES[result.tierLabel];
+  }
+
+  const PRESETS: Record<string, { s: string; c: number; a: string; h: string; f: boolean; r: boolean }> = {
+    cooking: { s: 'spike', c: 10, a: 'clean', h: 'stable', f: false, r: false },
+    steam: { s: 'slight', c: 5, a: 'clean', h: 'rising', f: false, r: false },
+    fire: { s: 'spike', c: 90, a: 'poor', h: 'dropping-fast', f: true, r: true },
+    gas: { s: 'spike', c: 10, a: 'poor', h: 'stable', f: false, r: false },
+  };
+
+  document.querySelectorAll<HTMLButtonElement>('[data-preset]').forEach((btn) => {
+    btn.addEventListener('click', () => {
+      const p = PRESETS[btn.dataset.preset!];
+      if (!p || !smoke || !co || !air || !humidity || !flame || !rising) return;
+      smoke.value = p.s;
+      co.value = String(p.c);
+      air.value = p.a;
+      humidity.value = p.h;
+      flame.checked = p.f;
+      rising.checked = p.r;
+      update();
+    });
+  });
+
+  [smoke, co, air, humidity, flame, rising].forEach((el) => el?.addEventListener('input', update));
+  update();
+</script>

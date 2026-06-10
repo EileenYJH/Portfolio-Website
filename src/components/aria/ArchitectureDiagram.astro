@@ -1,0 +1,74 @@
+---
+const nodes = [
+  { x: 110, y: 80, label: 'Node 1 · Zone A' },
+  { x: 110, y: 210, label: 'Node 2 · Zone B' },
+  { x: 110, y: 340, label: 'Node 3 · Zone B' },
+  { x: 690, y: 80, label: 'Node 4 · Zone C' },
+  { x: 690, y: 210, label: 'Node 5 · Zone A' },
+  { x: 690, y: 340, label: 'Node 6 · Zone C' },
+];
+---
+<div class="arch" data-reveal>
+  <svg viewBox="0 0 800 420" fill="none" role="img" aria-label="ARIA architecture: six sensor nodes send data wirelessly to one hub, which drives LED strips, a dashboard, and Telegram alerts.">
+    <g id="arch-links" stroke="#E5DFD4" stroke-width="1.5">
+      <line x1="110" y1="80" x2="370" y2="210" />
+      <line x1="110" y1="210" x2="370" y2="210" />
+      <line x1="110" y1="340" x2="370" y2="210" />
+      <line x1="690" y1="80" x2="430" y2="210" />
+      <line x1="690" y1="210" x2="430" y2="210" />
+      <line x1="690" y1="340" x2="430" y2="210" />
+    </g>
+    {nodes.map((n) => (
+      <g>
+        <circle cx={n.x} cy={n.y} r="34" fill="#FFFFFF" stroke="#E5DFD4" stroke-width="1.5" />
+        <circle cx={n.x} cy={n.y} r="8" fill="#C8501F" />
+        <text x={n.x} y={n.y + 58} text-anchor="middle" font-family="Inter Variable, sans-serif" font-size="13" fill="#6E6A60">{n.label}</text>
+      </g>
+    ))}
+    <g>
+      <rect x="340" y="160" width="120" height="100" rx="16" fill="#1C1B18" />
+      <text x="400" y="205" text-anchor="middle" font-family="Inter Variable, sans-serif" font-size="15" font-weight="600" fill="#FAF7F2">HUB</text>
+      <text x="400" y="228" text-anchor="middle" font-family="Inter Variable, sans-serif" font-size="11" fill="#B5B0A4">ESP-NOW · ch 6</text>
+    </g>
+    <g id="arch-packets">
+      <circle class="pkt" data-from="110,80" data-to="370,210" r="5" fill="#C8501F" />
+      <circle class="pkt" data-from="110,210" data-to="370,210" r="5" fill="#C8501F" />
+      <circle class="pkt" data-from="110,340" data-to="370,210" r="5" fill="#C8501F" />
+      <circle class="pkt" data-from="690,80" data-to="430,210" r="5" fill="#C8501F" />
+      <circle class="pkt" data-from="690,210" data-to="430,210" r="5" fill="#C8501F" />
+      <circle class="pkt" data-from="690,340" data-to="430,210" r="5" fill="#C8501F" />
+    </g>
+    <text x="400" y="320" text-anchor="middle" font-family="Inter Variable, sans-serif" font-size="13" fill="#6E6A60">↓ dashboard · LED strips · Telegram</text>
+  </svg>
+</div>
+
+<style>
+  .arch { background: var(--paper-raised); border: 1px solid var(--line); border-radius: var(--radius); padding: 1.5rem; }
+  .arch svg { width: 100%; height: auto; }
+</style>
+
+<script>
+  import { gsap } from '../../lib/motion';
+
+  const packets = document.querySelectorAll<SVGCircleElement>('.pkt');
+  if (packets.length && !window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+    packets.forEach((pkt, i) => {
+      const [fx, fy] = pkt.dataset.from!.split(',').map(Number);
+      const [tx, ty] = pkt.dataset.to!.split(',').map(Number);
+      gsap.fromTo(
+        pkt,
+        { attr: { cx: fx, cy: fy }, opacity: 0 },
+        {
+          attr: { cx: tx, cy: ty },
+          opacity: 1,
+          duration: 1.6,
+          delay: i * 0.45,
+          repeat: -1,
+          repeatDelay: 1.2,
+          ease: 'power1.inOut',
+          scrollTrigger: { trigger: '.arch', start: 'top 85%', toggleActions: 'play pause resume pause' },
+        },
+      );
+    });
+  }
+</script>

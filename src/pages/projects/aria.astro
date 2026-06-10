@@ -1,0 +1,171 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import ArchitectureDiagram from '../../components/aria/ArchitectureDiagram.astro';
+import FireScoreSimulator from '../../components/aria/FireScoreSimulator.astro';
+import EvacuationDemo from '../../components/aria/EvacuationDemo.astro';
+
+const sensors = [
+  { name: 'MQ-2', role: 'Smoke, LPG & combustibles — the first hint something is burning' },
+  { name: 'MQ-7', role: 'Carbon monoxide, converted to a ppm estimate — the silent killer check' },
+  { name: 'MQ-135', role: 'Chemical air quality — catches what smoke sensors miss' },
+  { name: 'Flame sensor', role: 'Direct IR flame detection, triple-read to reject sunlight' },
+  { name: 'DHT22', role: 'Temperature & humidity — separates steam from fire' },
+  { name: 'LDR + laser', role: 'Beam-break people counting at every exit for congestion detection' },
+];
+const galleryImages = [
+  { src: '/images/aria/dashboard-warden.png', alt: 'ARIA dashboard, warden tab: zone scores, alert pills, live floor map and escape-route canvas' },
+  { src: '/images/aria/dashboard-technical.png', alt: 'ARIA dashboard, technical tab: per-node sensor detail and live system log' },
+];
+---
+<BaseLayout
+  title="ARIA — distributed fire detection — Eileen Yeoh"
+  description="A 6-node ESP32 wireless sensor network that tells real fires from cooking smoke and routes people to safe exits. Interactive deep-dive."
+>
+  <section class="section wrap aria-hero">
+    <p class="eyebrow" data-reveal>Project 01 · 2025–2026</p>
+    <h1 data-split>ARIA</h1>
+    <p class="aria-tagline" data-reveal>
+      Autonomous Response &amp; Intelligence Architecture — a wireless sensor
+      network that knows the difference between a fire and your breakfast.
+    </p>
+    <ul class="aria-tags" data-reveal>
+      {['ESP32', 'ESP-NOW', 'multi-sensor fusion', 'embedded C++', 'WebSocket dashboard'].map((t) => <li>{t}</li>)}
+    </ul>
+  </section>
+
+  <section class="section wrap">
+    <p class="eyebrow" data-reveal>The problem</p>
+    <h2 data-split>Smoke detectors cry wolf.</h2>
+    <div class="problem-grid">
+      <p data-reveal>
+        A single smoke sensor can't tell combustion from cooking. Steam, haze,
+        and a hot wok all push the same reading up — so alarms get ignored,
+        batteries get pulled, and real fires get a head start.
+      </p>
+      <p data-reveal>
+        ARIA's answer: never trust one sensor. Each node fuses smoke, carbon
+        monoxide, air quality, flame, temperature, and humidity into a single
+        0–10 fire score — and evidence <em>against</em> fire subtracts points.
+      </p>
+    </div>
+  </section>
+
+  <section class="section wrap">
+    <p class="eyebrow" data-reveal>The system</p>
+    <h2 data-split>One hub. Six nodes. No router.</h2>
+    <p class="muted" data-reveal>
+      Nodes broadcast sensor packets to the hub every 500 ms over ESP-NOW.
+      The hub aggregates zone scores, drives LED evacuation strips, serves a
+      live dashboard over its own Wi-Fi access point, and pushes Telegram
+      alerts.
+    </p>
+    <ArchitectureDiagram />
+  </section>
+
+  <section class="section wrap">
+    <p class="eyebrow" data-reveal>Try it · the scoring algorithm</p>
+    <h2 data-split>Score the room yourself.</h2>
+    <p class="muted" data-reveal>
+      Set the sensors and watch the fire score react — including the
+      false-alarm patterns that <em>subtract</em> evidence. Try "Burnt toast":
+      heavy smoke, but clean CO and air quality means no alarm.
+    </p>
+    <FireScoreSimulator />
+  </section>
+
+  <section class="section wrap">
+    <p class="eyebrow" data-reveal>Try it · evacuation routing</p>
+    <h2 data-split>Set a fire. Watch the exits think.</h2>
+    <p class="muted" data-reveal>
+      The hub's LED strips guide people zone by zone — green chases toward a
+      safe exit, red warns away from fire, orange means the laser-beam
+      counters detected a crowded exit. Click zones to start fires; toggle
+      congestion and watch the routing adapt. This is ARIA's actual routing
+      table.
+    </p>
+    <EvacuationDemo />
+  </section>
+
+  <section class="section wrap">
+    <p class="eyebrow" data-reveal>Hardware</p>
+    <h2 data-split>Six senses per node.</h2>
+    <div class="sensor-grid">
+      {sensors.map((s, i) => (
+        <div class="card sensor-card" data-reveal data-reveal-delay={i * 0.06}>
+          <h3>{s.name}</h3>
+          <p class="muted sensor-role">{s.role}</p>
+        </div>
+      ))}
+    </div>
+  </section>
+
+  <section class="section wrap">
+    <p class="eyebrow" data-reveal>The dashboard</p>
+    <h2 data-split>Mission control in a browser.</h2>
+    <p class="muted" data-reveal>
+      The hub serves a live dashboard from its own Wi-Fi access point — no
+      internet needed. Fire wardens see zone scores, SOS locations, and a live
+      floor map; engineers get per-node telemetry and a real-time system log.
+    </p>
+    <div class="gallery">
+      {galleryImages.map((img) => (
+        <figure class="card gallery-item" data-reveal>
+          <img src={img.src} alt={img.alt} loading="lazy" width="1280" height="800" />
+        </figure>
+      ))}
+    </div>
+  </section>
+
+  <section class="section wrap outcome">
+    <p class="eyebrow" data-reveal>Outcome</p>
+    <h2 data-split>What I learned building it.</h2>
+    <div class="outcome-grid">
+      <div data-reveal>
+        <h3>Calibration beats specification.</h3>
+        <p class="muted">MQ sensors drift with every room. ARIA self-calibrates 30 samples at startup and sets thresholds relative to its own baseline.</p>
+      </div>
+      <div data-reveal data-reveal-delay="0.08">
+        <h3>Radios fight for airtime.</h3>
+        <p class="muted">ESP-NOW, Wi-Fi AP, and WS2812B timing all share one chip. Pinning the channel and disabling Wi-Fi power-save kept packets and pixels stable.</p>
+      </div>
+      <div data-reveal data-reveal-delay="0.16">
+        <h3>Negative evidence matters.</h3>
+        <p class="muted">The fire score improved most when contradictory signals started subtracting points — that's what finally beat the burnt-toast false alarm.</p>
+      </div>
+    </div>
+    <a class="btn" href="https://github.com/EileenYJH/ARIA" target="_blank" rel="noopener" data-reveal>
+      View the full source on GitHub →
+    </a>
+  </section>
+</BaseLayout>
+
+<style>
+  .aria-hero h1 { font-size: clamp(4rem, 14vw, 9rem); }
+  .aria-tagline { font-size: 1.3rem; max-width: 38ch; margin-top: 1.2rem; }
+  .aria-tags { list-style: none; padding: 0; display: flex; flex-wrap: wrap; gap: 0.6rem; margin-top: 1.8rem; }
+  .aria-tags li {
+    font-size: 0.8rem;
+    font-weight: 550;
+    padding: 0.3rem 0.85rem;
+    border-radius: 999px;
+    border: 1px solid var(--line);
+    background: var(--paper-raised);
+  }
+  .problem-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 2.5rem; margin-top: 2rem; }
+  .sensor-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 1.2rem;
+    margin-top: 2.5rem;
+  }
+  .sensor-role { font-size: 0.9rem; margin-top: 0.4rem; }
+  .gallery { display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; margin-top: 2.5rem; }
+  .gallery-item { padding: 0.6rem; }
+  .gallery-item img { border-radius: calc(var(--radius) - 6px); }
+  .outcome-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 2rem; margin-top: 2.5rem; }
+  .outcome .btn { margin-top: 3rem; }
+  @media (max-width: 800px) {
+    .problem-grid { grid-template-columns: 1fr; }
+    .gallery { grid-template-columns: 1fr; }
+  }
+</style>
