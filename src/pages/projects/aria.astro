@@ -4,13 +4,14 @@ import ArchitectureDiagram from '../../components/aria/ArchitectureDiagram.astro
 import FireScoreSimulator from '../../components/aria/FireScoreSimulator.astro';
 import EvacuationDemo from '../../components/aria/EvacuationDemo.astro';
 import ScannerDrone from '../../components/bots/ScannerDrone.astro';
+import NodeExploded from '../../components/aria/NodeExploded.astro';
 
 const sensors = [
   { name: 'MQ-2', role: 'Smoke, LPG & combustibles — the first hint something is burning' },
   { name: 'MQ-7', role: 'Carbon monoxide, converted to a ppm estimate — the silent killer check' },
   { name: 'MQ-135', role: 'Chemical air quality — catches what smoke sensors miss' },
   { name: 'Flame sensor', role: 'Direct IR flame detection, triple-read to reject sunlight' },
-  { name: 'DHT22', role: 'Temperature & humidity — separates steam from fire' },
+  { name: 'DHT11', role: 'Temperature & humidity — separates steam from fire' },
   { name: 'LDR + laser', role: 'Beam-break people counting at every exit for congestion detection' },
 ];
 const galleryImages = [
@@ -86,6 +87,16 @@ const galleryImages = [
       table.
     </p>
     <EvacuationDemo />
+  </section>
+
+  <section class="section wrap">
+    <p class="eyebrow" data-reveal>Hardware · node teardown</p>
+    <h2 data-split>Anatomy of a node.</h2>
+    <p class="muted" data-reveal>
+      Keep scrolling — the case lifts off and every component files out for
+      inspection. All of it fits in a 90 × 120 × 45 mm ventilated enclosure.
+    </p>
+    <NodeExploded />
   </section>
 
   <section class="section wrap">
