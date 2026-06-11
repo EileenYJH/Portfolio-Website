@@ -75,10 +75,11 @@ const fmt = new Intl.DateTimeFormat('en', { day: 'numeric', month: 'short', year
 </BaseLayout>
 
 <style>
+  .hero.wrap { width: min(1280px, 100% - 3rem); }
   .hero {
     position: relative;
     display: grid;
-    grid-template-columns: 1.15fr 1fr;
+    grid-template-columns: 1fr 1.1fr;
     align-items: center;
     gap: 2rem;
     height: calc(100svh - 58px);
