@@ -1,5 +1,5 @@
 <div class="arm-stage" id="arm-stage" aria-hidden="true">
-  <svg id="arm-svg" viewBox="0 0 600 600" fill="none">
+  <svg id="arm-svg" viewBox="-110 0 820 600" fill="none">
     <ellipse cx="300" cy="565" rx="120" ry="16" fill="#E4EAF3" />
     <g id="arm-base">
       <rect x="255" y="490" width="90" height="75" rx="12" fill="#14181F" />
@@ -26,11 +26,11 @@
 
 <style>
   .arm-stage {
-    width: min(480px, 80vw);
-    aspect-ratio: 1;
+    width: min(580px, 92vw);
+    aspect-ratio: 820 / 600;
     margin-inline: auto;
   }
-  .arm-stage svg { width: 100%; height: 100%; }
+  .arm-stage svg { width: 100%; height: 100%; overflow: visible; }
 </style>
 
 <script>
@@ -57,7 +57,7 @@
 
     function solveIK(tx: number, ty: number) {
       const dx = tx - SHOULDER.x;
-      const dy = ty - SHOULDER.y;
+      const dy = Math.min(ty - SHOULDER.y, -30);
       const d = clamp(Math.hypot(dx, dy), 40, L1 + L2 - 4);
       const baseAngle = Math.atan2(dy, dx);
       const cosShoulder = clamp((L1 * L1 + d * d - L2 * L2) / (2 * L1 * d), -1, 1);
@@ -65,8 +65,10 @@
       const shoulderRad = baseAngle + Math.acos(cosShoulder);
       const elbowRad = Math.acos(cosElbow) - Math.PI;
       const restShoulder = -Math.PI / 2;
+      let rel = shoulderRad - restShoulder;
+      rel = Math.atan2(Math.sin(rel), Math.cos(rel));
       return {
-        shoulder: ((shoulderRad - restShoulder) * 180) / Math.PI,
+        shoulder: (rel * 180) / Math.PI,
         elbow: ((elbowRad + Math.PI) * 180) / Math.PI - 180,
       };
     }
