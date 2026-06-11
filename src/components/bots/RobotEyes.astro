@@ -1,0 +1,116 @@
+---
+interface Props {
+  mood?: 'awake' | 'sleep';
+}
+const { mood = 'awake' } = Astro.props;
+---
+<div class={`robot-eyes mood-${mood}`} id="robot-eyes" aria-hidden="true">
+  <svg viewBox="0 0 200 180" fill="none">
+    <line x1="100" y1="14" x2="100" y2="42" stroke="#3B4554" stroke-width="5" stroke-linecap="round" />
+    <circle cx="100" cy="12" r="7" fill={mood === 'awake' ? '#2563EB' : '#94A3B8'} id="eyes-antenna" />
+    <rect x="30" y="42" width="140" height="112" rx="26" fill="#14181F" />
+    <rect x="14" y="78" width="12" height="36" rx="6" fill="#3B4554" />
+    <rect x="174" y="78" width="12" height="36" rx="6" fill="#3B4554" />
+    <rect x="44" y="58" width="112" height="80" rx="18" fill="#27303D" />
+    {mood === 'awake' ? (
+      <g>
+        <g id="eye-l">
+          <circle cx="78" cy="92" r="17" fill="#F6F8FB" />
+          <circle cx="78" cy="92" r="7" fill="#14181F" id="pupil-l" />
+        </g>
+        <g id="eye-r">
+          <circle cx="122" cy="92" r="17" fill="#F6F8FB" />
+          <circle cx="122" cy="92" r="7" fill="#14181F" id="pupil-r" />
+        </g>
+        <rect x="88" y="120" width="24" height="5" rx="2.5" fill="#F6F8FB" />
+      </g>
+    ) : (
+      <g>
+        <path d="M64 92 q14 12 28 0" stroke="#F6F8FB" stroke-width="5" stroke-linecap="round" fill="none" />
+        <path d="M108 92 q14 12 28 0" stroke="#F6F8FB" stroke-width="5" stroke-linecap="round" fill="none" />
+        <circle cx="100" cy="124" r="5" fill="#94A3B8" />
+        <text x="150" y="48" font-family="Inter Variable, sans-serif" font-size="18" fill="#5C6470" id="zzz-1">z</text>
+        <text x="164" y="32" font-family="Inter Variable, sans-serif" font-size="14" fill="#94A3B8" id="zzz-2">z</text>
+      </g>
+    )}
+  </svg>
+</div>
+
+<style>
+  .robot-eyes { width: min(180px, 36vw); margin-inline: auto; }
+  .robot-eyes svg { width: 100%; height: auto; display: block; }
+</style>
+
+<script>
+  import { gsap } from '../../lib/motion';
+
+  const root = document.getElementById('robot-eyes');
+  const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  if (root && !reduced) {
+    if (root.classList.contains('mood-awake')) {
+      const pl = document.getElementById('pupil-l');
+      const pr = document.getElementById('pupil-r');
+      const eyeL = document.getElementById('eye-l');
+      const eyeR = document.getElementById('eye-r');
+      const antenna = document.getElementById('eyes-antenna');
+      const fine = window.matchMedia('(pointer: fine)').matches;
+      let tx = 0;
+      let ty = 0;
+      const cur = { x: 0, y: 0 };
+      let t = 0;
+      let lastMove = 0;
+
+      if (fine) {
+        window.addEventListener('pointermove', (e) => {
+          const r = root.getBoundingClientRect();
+          const cx = r.left + r.width / 2;
+          const cy = r.top + r.height / 2;
+          const a = Math.atan2(e.clientY - cy, e.clientX - cx);
+          const d = Math.min(Math.hypot(e.clientX - cx, e.clientY - cy) / 40, 6.5);
+          tx = Math.cos(a) * d;
+          ty = Math.sin(a) * d;
+          lastMove = performance.now();
+        });
+      }
+
+      function frame(now: number) {
+        t += 0.016;
+        if (!fine || now - lastMove > 3000) {
+          tx = Math.sin(t * 0.6) * 5;
+          ty = Math.cos(t * 0.9) * 3;
+        }
+        cur.x += (tx - cur.x) * 0.12;
+        cur.y += (ty - cur.y) * 0.12;
+        pl?.setAttribute('transform', `translate(${cur.x} ${cur.y})`);
+        pr?.setAttribute('transform', `translate(${cur.x} ${cur.y})`);
+        requestAnimationFrame(frame);
+      }
+      requestAnimationFrame(frame);
+
+      function blink() {
+        if (eyeL && eyeR) {
+          gsap.to([eyeL, eyeR], {
+            scaleY: 0.08,
+            duration: 0.07,
+            yoyo: true,
+            repeat: 1,
+            svgOrigin: '100 92',
+          });
+        }
+        setTimeout(blink, 2400 + Math.random() * 2600);
+      }
+      setTimeout(blink, 1500);
+
+      if (antenna) gsap.to(antenna, { opacity: 0.3, duration: 1.1, repeat: -1, yoyo: true, ease: 'none' });
+    } else {
+      gsap.to(root.querySelector('svg'), { y: 4, duration: 2.2, repeat: -1, yoyo: true, ease: 'sine.inOut' });
+      const z1 = document.getElementById('zzz-1');
+      const z2 = document.getElementById('zzz-2');
+      if (z1 && z2) {
+        gsap.fromTo(z1, { opacity: 0.2 }, { opacity: 1, duration: 1.4, repeat: -1, yoyo: true });
+        gsap.fromTo(z2, { opacity: 1 }, { opacity: 0.2, duration: 1.4, repeat: -1, yoyo: true });
+      }
+    }
+  }
+</script>

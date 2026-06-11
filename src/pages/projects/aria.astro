@@ -3,6 +3,7 @@ import BaseLayout from '../../layouts/BaseLayout.astro';
 import ArchitectureDiagram from '../../components/aria/ArchitectureDiagram.astro';
 import FireScoreSimulator from '../../components/aria/FireScoreSimulator.astro';
 import EvacuationDemo from '../../components/aria/EvacuationDemo.astro';
+import ScannerDrone from '../../components/bots/ScannerDrone.astro';
 
 const sensors = [
   { name: 'MQ-2', role: 'Smoke, LPG & combustibles — the first hint something is burning' },
@@ -22,6 +23,7 @@ const galleryImages = [
   description="A 6-node ESP32 wireless sensor network that tells real fires from cooking smoke and routes people to safe exits. Interactive deep-dive."
 >
   <section class="section wrap aria-hero">
+    <ScannerDrone />
     <p class="eyebrow" data-reveal>Project 01 · 2025–2026</p>
     <h1 data-split>ARIA</h1>
     <p class="aria-tagline" data-reveal>
@@ -140,6 +142,7 @@ const galleryImages = [
 </BaseLayout>
 
 <style>
+  .aria-hero { position: relative; }
   .aria-hero h1 { font-size: clamp(4rem, 14vw, 9rem); }
   .aria-tagline { font-size: 1.3rem; max-width: 38ch; margin-top: 1.2rem; }
   .aria-tags { list-style: none; padding: 0; display: flex; flex-wrap: wrap; gap: 0.6rem; margin-top: 1.8rem; }

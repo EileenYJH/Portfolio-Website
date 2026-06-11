@@ -1,0 +1,45 @@
+<div class="drone" id="drone" aria-hidden="true">
+  <svg viewBox="0 0 160 150" fill="none">
+    <path id="drone-beam" d="M66 78 L46 138 L114 138 L94 78 Z" fill="#1D4ED8" opacity="0.1" />
+    <line x1="38" y1="46" x2="64" y2="58" stroke="#3B4554" stroke-width="5" stroke-linecap="round" />
+    <line x1="122" y1="46" x2="96" y2="58" stroke="#3B4554" stroke-width="5" stroke-linecap="round" />
+    <ellipse id="rotor-l" cx="34" cy="42" rx="20" ry="4" fill="#3B4554" />
+    <ellipse id="rotor-r" cx="126" cy="42" rx="20" ry="4" fill="#3B4554" />
+    <ellipse cx="80" cy="64" rx="32" ry="16" fill="#14181F" />
+    <circle cx="80" cy="60" r="6" fill="#2563EB" id="drone-led" />
+    <rect x="72" y="76" width="16" height="6" rx="3" fill="#3B4554" />
+  </svg>
+</div>
+
+<style>
+  .drone {
+    position: absolute;
+    right: clamp(0.5rem, 6vw, 6rem);
+    top: clamp(1rem, 8vh, 5rem);
+    width: clamp(80px, 11vw, 150px);
+    pointer-events: none;
+  }
+  .drone svg { width: 100%; height: auto; display: block; }
+  @media (max-width: 640px) { .drone { opacity: 0.55; } }
+</style>
+
+<script>
+  import { gsap } from '../../lib/motion';
+
+  const drone = document.getElementById('drone');
+  const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  if (drone && !reduced) {
+    gsap.to(drone, { y: 14, duration: 2.6, repeat: -1, yoyo: true, ease: 'sine.inOut' });
+    gsap.to(drone, { rotation: 2.5, duration: 3.4, repeat: -1, yoyo: true, ease: 'sine.inOut' });
+    const rotors = ['#rotor-l', '#rotor-r'];
+    rotors.forEach((sel) => {
+      const el = drone.querySelector(sel);
+      if (el) gsap.to(el, { scaleX: 0.25, duration: 0.1, repeat: -1, yoyo: true, ease: 'none', transformOrigin: 'center' });
+    });
+    const beam = drone.querySelector('#drone-beam');
+    if (beam) gsap.to(beam, { opacity: 0.22, duration: 1.6, repeat: -1, yoyo: true, ease: 'sine.inOut' });
+    const led = drone.querySelector('#drone-led');
+    if (led) gsap.to(led, { opacity: 0.3, duration: 0.8, repeat: -1, yoyo: true, ease: 'none' });
+  }
+</script>

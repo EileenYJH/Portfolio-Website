@@ -1,17 +1,17 @@
 <div class="evac card" data-reveal>
   <div class="evac-map">
     <svg viewBox="0 0 760 240" role="img" aria-label="Interactive floor map with zones A, B, C. Click a zone to simulate fire and see evacuation arrows re-route.">
-      <text x="28" y="126" font-family="Inter Variable, sans-serif" font-size="12" font-weight="600" fill="#6E6A60" transform="rotate(-90 28 126)">EXIT A</text>
+      <text x="28" y="126" font-family="Inter Variable, sans-serif" font-size="12" font-weight="600" fill="#5C6470" transform="rotate(-90 28 126)">EXIT A</text>
       <rect x="40" y="40" width="14" height="160" rx="4" fill="#2E7D4F" id="exit-A" />
-      <text x="732" y="126" font-family="Inter Variable, sans-serif" font-size="12" font-weight="600" fill="#6E6A60" transform="rotate(90 732 126)">EXIT C</text>
+      <text x="732" y="126" font-family="Inter Variable, sans-serif" font-size="12" font-weight="600" fill="#5C6470" transform="rotate(90 732 126)">EXIT C</text>
       <rect x="706" y="40" width="14" height="160" rx="4" fill="#2E7D4F" id="exit-C" />
       <rect x="333" y="26" width="94" height="14" rx="4" fill="#2E7D4F" id="exit-B" />
-      <text x="380" y="18" text-anchor="middle" font-family="Inter Variable, sans-serif" font-size="12" font-weight="600" fill="#6E6A60">EXIT B</text>
+      <text x="380" y="18" text-anchor="middle" font-family="Inter Variable, sans-serif" font-size="12" font-weight="600" fill="#5C6470">EXIT B</text>
       {(['A', 'B', 'C'] as const).map((z, i) => (
         <g class="zone" data-zone={z} style="cursor: pointer;">
-          <rect x={70 + i * 212} y="40" width="196" height="160" rx="10" fill="#FFFFFF" stroke="#E5DFD4" stroke-width="1.5" id={`zone-rect-${z}`} />
-          <text x={168 + i * 212} y="78" text-anchor="middle" font-family="Fraunces Variable, serif" font-size="26" fill="#1C1B18">Zone {z}</text>
-          <text x={168 + i * 212} y="100" text-anchor="middle" font-family="Inter Variable, sans-serif" font-size="11" fill="#6E6A60" id={`zone-hint-${z}`}>click to ignite</text>
+          <rect x={70 + i * 212} y="40" width="196" height="160" rx="10" fill="#FFFFFF" stroke="#DDE3EC" stroke-width="1.5" id={`zone-rect-${z}`} />
+          <text x={168 + i * 212} y="78" text-anchor="middle" font-family="Fraunces Variable, serif" font-size="26" fill="#14181F">Zone {z}</text>
+          <text x={168 + i * 212} y="100" text-anchor="middle" font-family="Inter Variable, sans-serif" font-size="11" fill="#5C6470" id={`zone-hint-${z}`}>click to ignite</text>
           <text x={168 + i * 212} y="160" text-anchor="middle" font-size="34" id={`zone-arrow-${z}`} fill="#2E7D4F"></text>
         </g>
       ))}
@@ -68,7 +68,7 @@
     orange: '#F9EDDA',
   };
   const STROKE: Record<string, string> = {
-    off: '#E5DFD4',
+    off: '#DDE3EC',
     green: '#2E7D4F',
     red: '#C03028',
     orange: '#D98E1B',

@@ -2,6 +2,7 @@
 import { getCollection } from 'astro:content';
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import ProjectCard from '../../components/ProjectCard.astro';
+import GantryBot from '../../components/bots/GantryBot.astro';
 
 const projects = (await getCollection('projects')).sort((a, b) => a.data.order - b.data.order);
 ---
@@ -9,6 +10,7 @@ const projects = (await getCollection('projects')).sort((a, b) => a.data.order -
   <section class="section wrap">
     <p class="eyebrow" data-reveal>Projects</p>
     <h1 data-split>Built, broken, rebuilt, explained</h1>
+    <GantryBot />
     <div class="proj-grid">
       {projects.map((p, i) => (
         <ProjectCard

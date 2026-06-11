@@ -1,0 +1,48 @@
+<div class="gantry" aria-hidden="true">
+  <svg viewBox="0 0 800 104" fill="none" preserveAspectRatio="xMidYMid meet">
+    <rect x="0" y="10" width="800" height="5" rx="2.5" fill="#DDE3EC" />
+    <rect x="0" y="0" width="8" height="24" rx="3" fill="#3B4554" />
+    <rect x="792" y="0" width="8" height="24" rx="3" fill="#3B4554" />
+    <g id="gantry-car" transform="translate(120,0)">
+      <rect x="-30" y="2" width="60" height="24" rx="7" fill="#14181F" />
+      <circle cx="-16" cy="12" r="4" fill="#2563EB" id="gantry-led" />
+      <circle cx="16" cy="12" r="4" fill="#3B4554" />
+      <rect x="-3" y="26" width="6" height="34" rx="3" fill="#3B4554" />
+      <circle cx="0" cy="64" r="7" fill="#14181F" />
+      <g id="gantry-claw-l" transform-origin="0 64">
+        <path d="M-3 66 q-12 10 -8 26" stroke="#14181F" stroke-width="7" stroke-linecap="round" fill="none" />
+      </g>
+      <g id="gantry-claw-r" transform-origin="0 64">
+        <path d="M3 66 q12 10 8 26" stroke="#14181F" stroke-width="7" stroke-linecap="round" fill="none" />
+      </g>
+    </g>
+  </svg>
+</div>
+
+<style>
+  .gantry { width: 100%; margin-top: 2rem; }
+  .gantry svg { width: 100%; height: auto; display: block; }
+</style>
+
+<script>
+  import { gsap } from '../../lib/motion';
+
+  const car = document.getElementById('gantry-car');
+  const clawL = document.getElementById('gantry-claw-l');
+  const clawR = document.getElementById('gantry-claw-r');
+  const led = document.getElementById('gantry-led');
+  const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  if (car && clawL && clawR && led && !reduced) {
+    gsap.to(car, {
+      attr: { transform: 'translate(680,0)' },
+      duration: 7,
+      repeat: -1,
+      yoyo: true,
+      ease: 'sine.inOut',
+    });
+    gsap.to(clawL, { rotation: -16, duration: 0.9, repeat: -1, yoyo: true, ease: 'sine.inOut', svgOrigin: '0 64' });
+    gsap.to(clawR, { rotation: 16, duration: 0.9, repeat: -1, yoyo: true, ease: 'sine.inOut', svgOrigin: '0 64' });
+    gsap.to(led, { opacity: 0.25, duration: 0.7, repeat: -1, yoyo: true, ease: 'none' });
+  }
+</script>

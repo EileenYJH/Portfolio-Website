@@ -1,5 +1,6 @@
 ---
 import BaseLayout from '../layouts/BaseLayout.astro';
+import RobotEyes from '../components/bots/RobotEyes.astro';
 
 const skills = [
   { area: 'Embedded systems', items: 'ESP32, Arduino, C/C++, ESP-NOW, I2C/SPI/UART' },
@@ -10,8 +11,13 @@ const skills = [
 ---
 <BaseLayout title="About — Eileen Yeoh" description="Eileen Yeoh — electrical & electronics engineering student building interactive, intelligent hardware systems.">
   <section class="section wrap">
-    <p class="eyebrow" data-reveal>About</p>
-    <h1 data-split>Hi, I'm Eileen.</h1>
+    <div class="about-head">
+      <div>
+        <p class="eyebrow" data-reveal>About</p>
+        <h1 data-split>Hi, I'm Eileen.</h1>
+      </div>
+      <RobotEyes mood="awake" />
+    </div>
     <div class="about-grid">
       <div class="about-story" data-reveal>
         <p>
@@ -45,6 +51,13 @@ const skills = [
 </BaseLayout>
 
 <style>
+  .about-head {
+    display: flex;
+    align-items: end;
+    justify-content: space-between;
+    gap: 2rem;
+    flex-wrap: wrap;
+  }
   .about-grid {
     display: grid;
     grid-template-columns: 1.1fr 1fr;

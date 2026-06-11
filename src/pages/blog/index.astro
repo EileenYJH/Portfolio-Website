@@ -1,6 +1,7 @@
 ---
 import { getCollection } from 'astro:content';
 import BaseLayout from '../../layouts/BaseLayout.astro';
+import PlotterBot from '../../components/bots/PlotterBot.astro';
 
 const posts = (await getCollection('blog')).sort(
   (a, b) => b.data.date.valueOf() - a.data.date.valueOf(),
@@ -11,6 +12,7 @@ const fmt = new Intl.DateTimeFormat('en', { day: 'numeric', month: 'short', year
   <section class="section wrap">
     <p class="eyebrow" data-reveal>Blog</p>
     <h1 data-split>Notes from the bench</h1>
+    <PlotterBot />
     <div class="blog-grid">
       {posts.map((post, i) => (
         <a class="card blog-card" href={`/blog/${post.id}`} data-reveal data-reveal-delay={i * 0.06}>

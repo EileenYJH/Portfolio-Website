@@ -1,11 +1,12 @@
 :root {
-  --paper: #FAF7F2;
+  --paper: #F6F8FB;
   --paper-raised: #FFFFFF;
-  --ink: #1C1B18;
-  --muted: #6E6A60;
-  --line: #E5DFD4;
-  --accent: #A8421A;
-  --accent-soft: #F4E3DA;
+  --ink: #14181F;
+  --muted: #5C6470;
+  --line: #DDE3EC;
+  --accent: #1D4ED8;
+  --accent-soft: #E2EAFB;
+  --steel: #3B4554;
   --safe: #2E7D4F;
   --danger: #C03028;
   --warn: #D98E1B;
@@ -64,6 +65,24 @@ img, video { max-width: 100%; height: auto; display: block; }
   letter-spacing: 0.14em;
   text-transform: uppercase;
   color: var(--accent);
+}
+.eyebrow::before {
+  content: '';
+  display: inline-block;
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--accent);
+  margin-right: 0.55rem;
+  vertical-align: 1px;
+  animation: led-blink 2.4s ease-in-out infinite;
+}
+@keyframes led-blink {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.25; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .eyebrow::before { animation: none; }
 }
 
 .muted { color: var(--muted); }
